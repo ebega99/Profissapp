@@ -1,0 +1,154 @@
+# Profissapp - Apache Configuration for Backend API
+
+# ========================================
+# Ativar rewrite module
+# ========================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Remove .php da URL
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^([^\.]+)$ $1.php [NC, L]
+
+    # Redirecionar requisições para index.php (API routing)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ api/index.php?request=$1 [QSA, L]
+
+    # HTTPS redirect (descomente em produção)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ========================================
+# Segurança básica
+# ========================================
+
+# Desabilitar listagem de diretórios
+Options -Indexes
+
+# Prevenir acesso a arquivos sensíveis
+<FilesMatch "\.(env|sql|config|json)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Bloquear acesso a .htaccess
+<Files .htaccess>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# ========================================
+# Headers de Segurança
+# ========================================
+
+# Prevenir MIME type sniffing
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # CORS headers (ajuste os domínios)
+    # Header set Access-Control-Allow-Origin "*"
+    # Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    # Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# ========================================
+# Compressão
+# ========================================
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# ========================================
+# Cache
+# ========================================
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 days"
+    
+    # Cache API responses (ajuste conforme necessário)
+    ExpiresByType application/json "access plus 5 minutes"
+    ExpiresByType application/xml "access plus 5 minutes"
+    
+    # Cache static files
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+</IfModule>
+
+# ========================================
+# PHP Settings (se necessário)
+# ========================================
+
+# Aumentar memory limit
+php_value memory_limit 256M
+
+# Aumentar upload max file size
+php_value upload_max_filesize 50M
+php_value post_max_size 50M
+
+# Aumentar max execution time
+php_value max_execution_time 300
+
+# Timezone
+php_value date.timezone "America/Sao_Paulo"
+
+# ========================================
+# Proteção contra ataques comuns
+# ========================================
+
+# Bloquear scripts suspeitos
+RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} UNION.*SELECT [NC,OR]
+RewriteCond %{QUERY_STRING} INSERT.*INTO [NC,OR]
+RewriteCond %{QUERY_STRING} DELETE.*FROM [NC]
+RewriteRule ^.* - [F]
+
+# ========================================
+# Melhorar performance
+# ========================================
+
+# Usar ETags
+<IfModule mod_headers.c>
+    Header append Cache-Control "public"
+</IfModule>
+
+# ========================================
+# API Rotas
+# ========================================
+
+# Exemplo de rotas para API:
+# GET  /api/generate-token         → api/generate-token.php
+# POST /api/verify-token           → api/verify-token.php
+# POST /api/create-payment         → api/create-payment.php
+# POST /api/webhook/payment        → api/webhook/payment.php
+# POST /api/restore-token          → api/restore-token.php
+
+# As rotas acima podem ser configuradas no index.php com tratamento de REQUEST_METHOD
+
+# ========================================
+# ErrorDocument (opcional)
+# ========================================
+
+# ErrorDocument 404 /api/error.php?code=404
+# ErrorDocument 500 /api/error.php?code=500
