@@ -1,0 +1,455 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                      ⚡ REFERÊNCIA TÉCNICA RÁPIDA ⚡                          ║
+║                                                                                ║
+║                    Guia de Consulta para Desenvolvedores                      ║
+║                                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔌 ENDPOINTS RÁPIDOS
+
+TOKEN ENDPOINTS:
+  POST /api/generate-token
+  POST /api/validate-token
+  POST /api/restore-token
+  POST /api/delete-token
+
+PAYMENT ENDPOINTS:
+  POST /api/create-payment
+  GET  /api/payment/{id}
+  GET  /api/payments
+  POST /api/confirm-payment
+  POST /api/refund-payment
+
+ADMIN ENDPOINTS:
+  GET  /api/health
+  GET  /api/statistics
+  POST /api/webhooks/mercado-pago
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 TABELAS DO BANCO DE DADOS
+
+users
+├─ id (INT, PK)
+├─ token (VARCHAR(255), UNIQUE)
+├─ status (ENUM: demo, profissa)
+├─ profissa_expires (DATETIME)
+├─ monthly_restorations_used (INT)
+├─ monthly_restorations_reset (DATE)
+├─ created_at (DATETIME)
+└─ updated_at (DATETIME)
+
+payments
+├─ id (INT, PK)
+├─ user_id (INT, FK)
+├─ mercado_pago_id (VARCHAR(50), UNIQUE)
+├─ amount (DECIMAL 10,2)
+├─ currency (VARCHAR(3))
+├─ status (ENUM: pending, approved, rejected, cancelled)
+├─ qr_code (LONGTEXT)
+├─ pix_code (TEXT)
+├─ webhook_received (BOOLEAN)
+├─ webhook_processed (BOOLEAN)
+├─ created_at (DATETIME)
+└─ updated_at (DATETIME)
+
+restorations
+├─ id (INT, PK)
+├─ user_id (INT, FK)
+├─ device_fingerprint (VARCHAR(255))
+├─ restoration_month (MONTH)
+├─ created_at (DATETIME)
+└─ updated_at (DATETIME)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 VARIÁVEIS DE AMBIENTE (.env)
+
+MERCADO_PAGO_PUBLIC_KEY=APP_USR-xxxxxxxxxxxxxxxx
+MERCADO_PAGO_ACCESS_TOKEN=APP_USR-xxxxxxxxxxxxxxxx
+SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (32 chars)
+APP_URL=https://seu_dominio.com
+WEBHOOK_URL=https://seu_dominio.com/api/webhooks/mercado-pago.php
+FRONTEND_URL=https://seu_dominio.com
+DB_HOST=localhost
+DB_USER=ebega99
+DB_PASS=Gorila93@
+DB_NAME=profissapp
+LOG_PATH=/home/seu_user/logs
+TOKEN_PREFIX=PF
+MAX_RESTORATIONS_PER_MONTH=3
+PROFISSA_DURATION_DAYS=30
+ALLOWED_ORIGINS=https://seu_dominio.com,https://www.seu_dominio.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📡 EXEMPLO: GERAR TOKEN (Request & Response)
+
+REQUEST:
+  POST /api/generate-token HTTP/1.1
+  Host: seu_dominio.com
+  Content-Type: application/json
+
+RESPONSE (200 OK):
+  {
+    "success": true,
+    "message": "Token gerado com sucesso",
+    "data": {
+      "token": "PF1701234567890abcdefghij",
+      "status": "demo",
+      "daysRemaining": null,
+      "restorationsAvailable": 3,
+      "message": "Bem-vindo! Você tem acesso ao Demo por 3 restaurações/mês"
+    },
+    "timestamp": "2024-01-15T10:30:45Z"
+  }
+
+EXEMPLO COM cURL:
+  curl -X POST https://seu_dominio.com/api/generate-token \
+       -H "Content-Type: application/json"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💳 EXEMPLO: CRIAR PAGAMENTO (Request & Response)
+
+REQUEST:
+  POST /api/create-payment HTTP/1.1
+  Host: seu_dominio.com
+  Content-Type: application/json
+  Authorization: Bearer PF1701234567890abcdefghij
+
+  {
+    "paymentMethod": "pix"
+  }
+
+RESPONSE (201 CREATED):
+  {
+    "success": true,
+    "message": "Pagamento criado com sucesso",
+    "data": {
+      "paymentId": 123456789,
+      "mercadoPagoId": "98765432100",
+      "status": "pending",
+      "qrCode": "00020126580014br.gov....",
+      "pixCode": "12345678901234567890123456789012",
+      "expiresAt": "2024-01-15T11:30:45Z",
+      "amount": 5.00,
+      "currency": "BRL"
+    },
+    "timestamp": "2024-01-15T10:30:45Z"
+  }
+
+EXEMPLO COM cURL:
+  curl -X POST https://seu_dominio.com/api/create-payment \
+       -H "Content-Type: application/json" \
+       -H "Authorization: Bearer PF1701234567890abcdefghij" \
+       -d '{"paymentMethod":"pix"}'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️  FORMATO DE RESPOSTAS
+
+Success (2xx):
+{
+  "success": true,
+  "message": "Mensagem descritiva",
+  "data": { ... },
+  "timestamp": "ISO-8601"
+}
+
+Error (4xx):
+{
+  "success": false,
+  "message": "Erro descritivo",
+  "errors": { ... },
+  "timestamp": "ISO-8601"
+}
+
+Validation Error (422):
+{
+  "success": false,
+  "message": "Erro de validação",
+  "errors": {
+    "field_name": ["Erro específico"],
+    ...
+  },
+  "timestamp": "ISO-8601"
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 STATUS HTTP UTILIZADOS
+
+  200 OK                     Requisição bem-sucedida
+  201 Created                Recurso criado com sucesso
+  204 No Content             Sucesso sem conteúdo de retorno
+  400 Bad Request            Requisição malformada
+  401 Unauthorized           Token inválido ou ausente
+  403 Forbidden              Ação não permitida
+  404 Not Found              Recurso não encontrado
+  422 Unprocessable Entity   Validação falhou
+  429 Too Many Requests      Rate limiting ativo
+  500 Internal Server Error  Erro no servidor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🪝 REACT HOOKS - useAuth
+
+const { 
+  token,                    // String ou null
+  status,                   // 'demo' ou 'profissa'
+  daysRemaining,            // Número ou null
+  restorationsAvailable,    // Número
+  loading,                  // Boolean
+  error,                    // String ou null
+  generateToken,            // Function
+  validateToken,            // Function
+  restoreToken,             // Function
+  logout                    // Function
+} = useAuth();
+
+Exemplo:
+  const { token, status, generateToken } = useAuth();
+  const handleLogin = () => {
+    generateToken().then(success => {
+      if (success) console.log('Logado!');
+    });
+  };
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💳 REACT HOOKS - usePayment
+
+const {
+  paymentId,                // Número ou null
+  qrCode,                   // String ou null
+  copyPaste,                // String ou null
+  paymentStatus,            // 'pending', 'approved', 'rejected'
+  loading,                  // Boolean
+  error,                    // String ou null
+  createPayment,            // Function
+  checkPaymentStatus,       // Function
+  monitorPayment,           // Function (polling)
+  confirmPayment,           // Function
+  refundPayment,            // Function
+  copyPixCode,              // Function
+  reset                     // Function
+} = usePayment();
+
+Exemplo:
+  const { paymentId, qrCode, createPayment } = usePayment();
+  const handlePay = () => {
+    createPayment().then(success => {
+      if (success) console.log('QR Code:', qrCode);
+    });
+  };
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 FLUXO DE AUTENTICAÇÃO
+
+1. Usuário abre app
+2. App chama generateToken()
+3. API retorna token (formato: PF + timestamp + random)
+4. Frontend salva em localStorage
+5. Cada requisição envia: Authorization: Bearer <token>
+6. Backend valida token em Auth::getToken()
+7. API processa requisição
+8. Resposta retorna com status (demo/profissa)
+9. Frontend mantém estado sincronizado
+
+Token localStorage:
+  JSON.parse(localStorage.getItem('profissapp')).token
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 AUTENTICAÇÃO - FORMATO DO TOKEN
+
+Estrutura:
+  PF + {10-digit-timestamp} + {12-char-random}
+  
+Exemplo:
+  PF1701234567890 + AbCdEfGhIjKl
+  = PF1701234567890AbCdEfGhIjKl
+
+Validação:
+  ✓ Começa com "PF"
+  ✓ Seguido por 10 dígitos (timestamp Unix)
+  ✓ Seguido por 12 caracteres alfanuméricos
+  ✓ Total: 25 caracteres
+  ✓ Regex: /^PF\d{10}[a-zA-Z0-9]{12}$/
+
+Armazenamento:
+  - localStorage (navegador)
+  - sessionStorage (sessão)
+  - Cookie seguro (HTTPS)
+  - RAM (variável de estado)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 CICLO DE VIDA DO PAGAMENTO PIX
+
+Estado: pending
+↓
+[Usuário faz PIX pelo app do banco]
+↓
+Mercado Pago recebe confirmação
+↓
+Mercado Pago envia webhook
+↓
+Backend valida HMAC-SHA256
+↓
+Backend atualiza Payment.status = "approved"
+↓
+Backend ativa Profissa (30 dias)
+↓
+Backend marca webhook como "processed"
+↓
+Frontend detecta status "approved" via polling
+↓
+Estado: approved
+↓
+Modal fecha
+↓
+Status do usuário: Profissa - 30 dias
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 COMANDOS ÚTEIS
+
+# Testar health check
+curl https://seu_dominio.com/api/health
+
+# Gerar token
+curl -X POST https://seu_dominio.com/api/generate-token
+
+# Validar token
+curl -X POST https://seu_dominio.com/api/validate-token \
+     -H "Authorization: Bearer SEU_TOKEN"
+
+# Criar pagamento
+curl -X POST https://seu_dominio.com/api/create-payment \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer SEU_TOKEN" \
+     -d '{"paymentMethod":"pix"}'
+
+# Ver status pagamento
+curl https://seu_dominio.com/api/payment/ID_PAGAMENTO \
+     -H "Authorization: Bearer SEU_TOKEN"
+
+# Monitorar logs
+tail -f /home/seu_user/logs/api.log
+tail -f /home/seu_user/logs/payments.log
+tail -f /home/seu_user/logs/errors.log
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🐛 ERROS COMUNS
+
+Erro: "Invalid token format"
+→ Token não segue formato PF + timestamp + random
+
+Erro: "Token not found"
+→ Falta Authorization header ou token em query/body
+
+Erro: "Payment not found"
+→ ID do pagamento inválido ou não existe
+
+Erro: "Webhook signature invalid"
+→ Secret key incorreta ou timestamp expirado (> 10 min)
+
+Erro: "Database connection failed"
+→ Credenciais .env incorretas ou DB offline
+
+Erro: "Mercado Pago API error"
+→ Chaves de API inválidas ou conta sem acesso
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📈 MONITORAMENTO
+
+Logs Críticos:
+  - logs/errors.log        (erros de aplicação)
+  - logs/api.log           (todas as requisições)
+  - logs/payments.log      (transações)
+
+O que monitorar:
+  ✓ Taxa de erro (errors.log)
+  ✓ Tempo de resposta (api.log)
+  ✓ Tentativas de acesso não autorizado (401/403)
+  ✓ Pagamentos pendentes (payments.log)
+  ✓ Falhas de webhook
+  ✓ Uso de BD (queries/seg)
+
+Alertas importantes:
+  🔴 Muitos 500 errors
+  🟡 Resposta > 1 segundo
+  🔴 Webhook delivery failures
+  🔴 Database connection errors
+  🟡 Rate limiting ativo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 PERFORMANCE
+
+Otimizações implementadas:
+  ✅ Índices nas tabelas
+  ✅ Prepared statements
+  ✅ Caching de queries
+  ✅ JSON responses comprimidas
+  ✅ Logs assíncronos
+
+Targets:
+  ✓ Response time: < 500ms
+  ✓ Token generation: < 100ms
+  ✓ Payment status: < 200ms
+  ✓ Webhook processing: < 1s
+
+Escalabilidade:
+  ✓ Pronto para 10k+ usuários
+  ✓ Pronto para 1k+ pagamentos/dia
+  ✓ MySQL replication ready
+  ✓ Load balancing ready
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 LINKS IMPORTANTES
+
+Mercado Pago:
+  https://www.mercadopago.com.br/developers/panel
+  https://www.mercadopago.com.br/developers/pt/reference
+
+Documentação:
+  api/API.md                (endpoints)
+  DEPLOY.md                 (deployment)
+  BACKEND_SETUP.md          (setup local)
+  ARQUITETURA.md            (diagramas)
+
+Support:
+  Logs: /home/seu_user/logs/
+  Docs: Todos em raiz do projeto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 DICAS RÁPIDAS
+
+1. Use POSTMAN para testar endpoints
+2. Sempre ative HTTPS em produção
+3. Monitore logs diariamente
+4. Faça backup do banco diariamente
+5. Teste webhooks em sandbox primeiro
+6. Mantenha .env seguro (nunca commitar)
+7. Atualize os dados de exemplo
+8. Implemente rate limiting se necessário
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tudo pronto! Use este guia como referência rápida durante o desenvolvimento.
+
+Boa sorte! 🚀
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                  Para mais detalhes, consulte DEPLOY.md                       ║
+╚════════════════════════════════════════════════════════════════════════════════╝
