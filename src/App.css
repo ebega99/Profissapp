@@ -59,6 +59,14 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  text-align: left;
+}
+
+.logo-section > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .app-icon {
@@ -89,17 +97,17 @@ body {
 
 .status-section {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .status-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: var(--bg-light);
-  padding: 0.75rem 1.25rem;
-  border-radius: 8px;
+  background: transparent;
+  padding: 0;
   font-weight: 500;
 }
 
@@ -114,6 +122,12 @@ body {
   background: var(--demo-green);
 }
 
+.status-dot.off {
+  background: transparent;
+  border: 2px solid var(--border);
+  animation: none;
+}
+
 .status-dot.profissa {
   background: var(--demo-green);
 }
@@ -122,6 +136,9 @@ body {
   font-size: 0.95rem;
   color: var(--text);
   min-width: 60px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .days-remaining {
@@ -297,11 +314,33 @@ body {
 }
 
 .form-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: var(--text);
   font-size: 0.95rem;
+}
+
+.icon-phone {
+  color: var(--primary); /* Azul do tema */
+}
+
+.icon-whatsapp {
+  color: #25D366; /* Verde oficial do WhatsApp */
+}
+
+.label-logo-container {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
 }
 
 .form-group input {
@@ -318,6 +357,91 @@ body {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.observations-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* Logo Selector Improvements */
+.logo-selection-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pointer-icon-container {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.pointer-icon {
+  transform: rotate(90deg);
+}
+
+.font-awesome-trigger {
+  width: fit-content;
+  padding: 0.6rem 2rem;
+  background: var(--success);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.font-awesome-trigger:hover {
+  background: var(--bg-white);
+  color: var(--success);
+  box-shadow: inset 0 0 0 2px var(--success);
+}
+
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-light);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.icon-option {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-light);
+}
+
+.icon-option:hover, .icon-option.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 /* Logo Selector */
@@ -369,7 +493,7 @@ body {
 
 .item-row {
   display: grid;
-  grid-template-columns: 1fr 80px 100px 40px;
+  grid-template-columns: 1fr 120px 40px;
   gap: 0.75rem;
   align-items: center;
 }
@@ -383,6 +507,11 @@ body {
 
 .item-description {
   min-width: 0;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+  overflow-y: hidden;
+  display: block;
 }
 
 .item-quantity,
@@ -457,17 +586,18 @@ body {
 }
 
 .demo-banner {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--demo-green);
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  opacity: 0.7;
+  display: block;
+  width: fit-content;
+  margin: 0.5rem 0 1.5rem 0;
+  background: rgba(16, 185, 129, 0.12);
+  color: rgba(6, 95, 70, 0.5);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  pointer-events: none;
+  text-transform: uppercase;
 }
 
 .quote-header {
@@ -505,6 +635,17 @@ body {
   color: var(--text-light);
   margin: 0;
   font-size: 0.95rem;
+}
+
+.quote-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.quote-contact-row svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Quote Table */
@@ -552,8 +693,10 @@ body {
 }
 
 .desc-cell {
-  max-width: 300px;
+  max-width: 40ch;
   word-wrap: break-word;
+  text-align: left;
+  white-space: pre-wrap;
 }
 
 /* Quote Total */
@@ -564,6 +707,7 @@ body {
   padding: 1rem 0;
   border-top: 2px solid var(--primary);
   border-bottom: 2px solid var(--primary);
+  margin-top: 2rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
@@ -577,6 +721,23 @@ body {
   font-size: 1.25rem;
   min-width: 150px;
   text-align: right;
+}
+
+.quote-observations-preview {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.quote-observations-preview strong {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.quote-observations-preview p {
+  margin-top: 0.25rem;
+  white-space: pre-wrap;
 }
 
 /* Quote Footer */
@@ -668,8 +829,8 @@ body {
 .modal-content {
   background: var(--bg-white);
   border-radius: 16px;
-  padding: 2.5rem;
-  max-width: 500px;
+  padding: 1.5rem;
+  max-width: 320px;
   width: 100%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -678,12 +839,12 @@ body {
 
 .modal-close {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: 0.75rem;
+  right: 0.75rem;
   background: var(--bg-light);
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -699,7 +860,7 @@ body {
 }
 
 .modal-content h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   margin-bottom: 0.5rem;
   color: var(--text);
   text-align: center;
@@ -708,14 +869,14 @@ body {
 .modal-content > p:nth-of-type(1) {
   color: var(--text-light);
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .qr-code-container {
   display: flex;
   justify-content: center;
-  margin: 2rem 0;
-  padding: 1.5rem;
+  margin: 1rem 0;
+  padding: 0.75rem;
   background: var(--bg-light);
   border-radius: 12px;
 }
@@ -780,26 +941,23 @@ body {
   }
 
   .form-section {
-    order: 2;
-  }
-
-  .preview-section {
     order: 1;
   }
 
+  .preview-section {
+    order: 2;
+  }
+
   .header-content {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 1rem;
   }
 
   .status-section {
-    width: 100%;
-  }
-
-  .status-item {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    align-items: flex-start;
   }
 }
 
@@ -809,8 +967,10 @@ body {
   }
 
   .header-content {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   .logo-section {
@@ -854,12 +1014,19 @@ body {
     height: 40px;
   }
 
+.quote-company-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
   .quote-company-info h3 {
     font-size: 1.25rem;
   }
 
   .item-row {
-    grid-template-columns: 1fr 60px 80px 36px;
+    grid-template-columns: 1fr 100px 36px;
     gap: 0.5rem;
   }
 
@@ -914,7 +1081,7 @@ body {
 
 @media (max-width: 380px) {
   .item-row {
-    grid-template-columns: 1fr 50px 60px 32px;
+    grid-template-columns: 1fr 80px 32px;
   }
 
   .item-row input {
@@ -929,13 +1096,6 @@ body {
 
   .quote-company-info h3 {
     font-size: 1.1rem;
-  }
-}
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
   }
 }
 

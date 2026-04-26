@@ -3,8 +3,7 @@
  * Arquivo: src/services/api.js
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
+const API_BASE_URL = 'https://fibra99.com.br/profissapp/api/index.php';
 class ApiService {
   /**
    * Fazer requisição genérica

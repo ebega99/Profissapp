@@ -1,11 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /api/
+    RewriteBase /profissapp/api/
 
-    # Ignorar arquivos e diretórios reais
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # Se o arquivo ou diretório existir fisicamente, serve ele diretamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
 
-    # Redirecionar tudo para index.php
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+    # Para todas as outras requisições, redireciona para o index.php
+    RewriteRule ^ index.php [QSA,L]
 </IfModule>

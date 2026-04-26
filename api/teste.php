@@ -50,31 +50,17 @@ try {
     $mercadoPago = new MercadoPago(MERCADO_PAGO_ACCESS_TOKEN, MERCADO_PAGO_PUBLIC_KEY);
 
     // Parser da URL
-    // Parser da URL - capturando PATH_INFO
-    $request_uri = $_SERVER['REQUEST_URI'];
+    $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $request_method = $_SERVER['REQUEST_METHOD'];
 
-    // Verifica se existe PATH_INFO (quando acessa /index.php/algumacoisa)
-    if (isset($_SERVER['PATH_INFO'])) {
-        $request_uri = $_SERVER['PATH_INFO'];
-    } else {
-        // Fallback: parse normal
-        $request_uri = parse_url($request_uri, PHP_URL_PATH);
-        
-        // Remove o caminho base da API
-        $base_path = '/profissapp/api';
-        if (strpos($request_uri, $base_path) === 0) {
-            $request_uri = substr($request_uri, strlen($base_path));
-        }
-        
-        // Remove /index.php se estiver no meio
-        if (strpos($request_uri, '/index.php') === 0) {
-            $request_uri = substr($request_uri, strlen('/index.php'));
-        }
+    // Remove /profissapp/api do início da string
+    $base_path = '/profissapp/api';
+    if (strpos($request_uri, $base_path) === 0) {
+        $request_uri = substr($request_uri, strlen($base_path));
     }
 
     // Garante que comece com /
-    if (empty($request_uri) || $request_uri === '/index.php') {
+    if (empty($request_uri)) {
         $request_uri = '/';
     }
 
